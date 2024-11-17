@@ -1,4 +1,4 @@
-Predicting Patient Outcomes Using Machine Learning Models
+Predicting Patient Readmission Using Machine Learning Models
 
 Overview
 This project aims to predict patient outcomes using multiple machine learning models. The dataset consists of various medical and demographic features. The project explores Logistic Regression, Decision Tree, Random Forest, and XGBoost classifiers, evaluating their performance and identifying the most influential features affecting the outcomes.
