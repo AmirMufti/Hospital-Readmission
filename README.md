@@ -17,7 +17,7 @@ Binary classification of whether a diabetic patient is readmitted to hospital, u
 
 **Reading the table:** the four models are within about half a percentage point of each other on accuracy, so no model is clearly better. Random Forest has the best recall and F1, which may matter more than accuracy if missing a likely readmission is costly. XGBoost has the highest accuracy only by a margin well inside run-to-run noise.
 
-### Most influential features (XGBoost gain importance)
+### Most influential features (XGBoost feature importance)
 
 | Feature | Importance |
 |---|---|
