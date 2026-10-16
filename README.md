@@ -1,66 +1,78 @@
-Predicting Patient Readmission Using Machine Learning Models
+# Hospital Readmission Prediction
 
-Overview
-This project aims to predict patient outcomes using multiple machine learning models. The dataset consists of various medical and demographic features. The project explores Logistic Regression, Decision Tree, Random Forest, and XGBoost classifiers, evaluating their performance and identifying the most influential features affecting the outcomes.
+Binary classification of whether a diabetic patient is readmitted to hospital, using demographic, clinical and medication features. The project compares four classifiers and reports which features drive their predictions, with an explicit comparison to a naive baseline.
 
-Key Objectives
-Build predictive models for patient outcomes.
-Identify key features influencing patient outcomes.
-Compare and evaluate model performances.
+**Dataset:** [Hospital Readmissions on Kaggle](https://www.kaggle.com/datasets/dubradave/hospital-readmissions), 25,000 patient records, 17 columns.
 
-Dataset Description
-The dataset contains medical and demographic attributes, including:
-age" - age bracket of the patient
-"time_in_hospital" - days (from 1 to 14)
-"n_procedures" - number of procedures performed during the hospital stay
-"n_lab_procedures" - number of laboratory procedures performed during the hospital stay
-"n_medications" - number of medications administered during the hospital stay
-"n_outpatient" - number of outpatient visits in the year before a hospital stay
-"n_inpatient" - number of inpatient visits in the year before the hospital stay
-"n_emergency" - number of visits to the emergency room in the year before the hospital stay
-"medical_specialty" - the specialty of the admitting physician
-"diag_1" - primary diagnosis (Circulatory, Respiratory, Digestive, etc.)
-"diag_2" - secondary diagnosis
-"diag_3" - additional secondary diagnosis
-"glucose_test" - whether the glucose serum came out as high (> 200), normal, or not performed
-"A1Ctest" - whether the A1C level of the patient came out as high (> 7%), normal, or not performed
-"change" - whether there was a change in the diabetes medication ('yes' or 'no')
-"diabetes_med" - whether a diabetes medication was prescribed ('yes' or 'no')
-"readmitted" - if the patient was readmitted at the hospital ('yes' or 'no')
+## Key results
 
-Models and Results
-1. Logistic Regression
-Accuracy: 60.96%
-Simple linear model providing a baseline.
-2. Decision Tree
-Accuracy: 60.98%
-A tree-based approach with max depth = 3 for interpretability.
-3. Random Forest
-Accuracy: 60.72%
-An ensemble method providing better generalization.
-4. XGBoost
-Accuracy: 61.08%
-Most accurate model leveraging gradient boosting.
+| Model | Accuracy | Precision | Recall | F1 |
+|---|---|---|---|---|
+| Logistic Regression | 0.610 | 0.630 | 0.411 | 0.497 |
+| Decision Tree (max depth 3) | 0.610 | 0.600 | 0.509 | 0.551 |
+| Random Forest | 0.607 | 0.595 | 0.516 | 0.553 |
+| XGBoost | 0.611 | 0.622 | 0.438 | 0.514 |
 
-Feature Importance
-Key features influencing outcomes, as identified by XGBoost:
-n_lab_procedures (18.3% importance)
-Most significant feature affecting patient outcomes.
-n_medications (14.3%)
-Reflects treatment intensity.
-time_in_hospital (9.5%)
-Duration of stay impacts outcomes.
-age (5.3%)
-Older patients show distinct trends.
-n_procedures (5.2%)
-Indicates procedural complexity.
-n_inpatient (5.0%)
-Inpatient visit frequency.
-Other diagnostic categories contribute incrementally to the model's decisions.
+**Baseline:** predicting "not readmitted" for everyone scores **0.530** accuracy, because the classes are roughly 53% / 47%. All four models beat that baseline by about 8 points, which is a real but modest signal.
 
-Tools and Libraries
-Programming Language: Python
-Libraries: pandas, numpy, scikit-learn, xgboost, matplotlib, seaborn.
+**Reading the table:** the four models are within about half a percentage point of each other on accuracy, so no model is clearly better. Random Forest has the best recall and F1, which may matter more than accuracy if missing a likely readmission is costly. XGBoost has the highest accuracy only by a margin well inside run-to-run noise.
 
-Conclusion
-The project demonstrates that XGBoost outperforms other models, achieving the highest accuracy. The analysis highlights critical features like n_lab_procedures and n_medications, offering actionable insights for medical practitioners.
+### Most influential features (XGBoost feature importance)
+
+| Feature | Importance |
+|---|---|
+| `n_lab_procedures` | 18.3% |
+| `n_medications` | 14.3% |
+| `time_in_hospital` | 9.5% |
+| `age` | 5.3% |
+| `n_procedures` | 5.2% |
+| `n_inpatient` | 5.0% |
+
+Diagnosis-category features each contribute a smaller share. Importance from a tree model shows what the model uses, not what causes readmission.
+
+## Data
+
+| Column | Description |
+|---|---|
+| `age` | Age bracket |
+| `time_in_hospital` | Length of stay, 1 to 14 days |
+| `n_lab_procedures`, `n_procedures`, `n_medications` | Counts during the stay |
+| `n_outpatient`, `n_inpatient`, `n_emergency` | Visits in the year before admission |
+| `medical_specialty` | Specialty of the admitting physician |
+| `diag_1`, `diag_2`, `diag_3` | Diagnosis categories (circulatory, respiratory, diabetes, etc.) |
+| `glucose_test`, `A1Ctest` | High, normal, or not performed |
+| `change`, `diabetes_med` | Whether diabetes medication changed / was prescribed |
+| `readmitted` | **Target:** `yes` or `no` |
+
+Data quality notes from the EDA:
+
+- No missing values in the numeric columns. A small number of rows have a missing `diag_1`; these keep their `diag_2` and `diag_3` values.
+- The visit-count columns (`n_outpatient`, `n_inpatient`, `n_emergency`) are heavily right-skewed with long tails. Extreme records were inspected and kept, since no errors were found.
+- Pairwise correlations between the features are weak, so all features were retained.
+
+## Method
+
+1. EDA, including distribution plots, outlier inspection and correlation checks.
+2. Feature encoding (one-hot for categoricals) and min-max scaling.
+3. Training of Logistic Regression, Decision Tree, Random Forest and XGBoost on a train/test split.
+4. Comparison on accuracy, precision, recall and F1, with a majority-class baseline.
+5. Feature-importance analysis for the tree-based models.
+
+The full analysis is in `Hospital Readmission.ipynb`.
+
+## Limitations
+
+- The signal is modest. Accuracy is about 61% against a 53% baseline, so these models should not be used to make individual clinical decisions.
+- This is a single dataset with a single train/test split. Results have not been checked across multiple splits or on external data.
+- The dataset is an extract and does not include the full clinical history, so the models cannot account for many factors that drive real readmissions.
+
+## Repository contents
+
+| File | Purpose |
+|---|---|
+| `Hospital Readmission.ipynb` | Full analysis: EDA, feature engineering, model training and evaluation |
+| `README.md` | This document |
+
+## Reproduce
+
+Download the dataset from Kaggle, place the CSV in the project folder, then open the notebook. Requires `pandas`, `numpy`, `scikit-learn`, `xgboost`, `matplotlib` and `seaborn`.
